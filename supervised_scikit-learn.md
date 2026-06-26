@@ -1,8 +1,20 @@
-# Supervised Learning with Scikit-Learn
+ # Supervised Learning with Scikit-Learn
 
----
+## Types of supervised learning
+### Classification: 
+Used to predict the label o categoria
+For example: A spam email si es fraud o no 
+### Regression: 
+Cuando el target es continuo
+For example: Price of a house
 
-## Classification
+## scikit-Learn syntax
+```python
+from sklearn.module import Model
+model = Model()
+model.fit(X,y)
+predictions = model.predict(X_new)
+```
 
 ### K-Nearest Neighbors (KNN)
 
@@ -101,10 +113,12 @@ print(knn.score(X_test, y_test))
 #### Checking under and over fitting
 
 ```python
-neighbors = np.arange(1, 13)
+# 1, 13 means del 1 al 12 incluyendo el 12
+neighbors = np.arange(1, 13) 
 train_accuracies = {}
 test_accuracies = {}
 
+# Sirve para probar cual k es mas accurate
 for neighbor in neighbors:
     knn = KNeighborsClassifier(n_neighbors=neighbor)
     knn.fit(X_train, y_train)
@@ -197,19 +211,45 @@ y_pred = reg.predict(X_test)
 print("Predictions: {}, Actual Values: {}".format(y_pred[:2], y_test[:2]))
 ```
 
+#### Regression mechanics
+y = ax + b
+y -> target
+x -> single feature
+a, b -> parameters/coeficients of the model aka slope. intercept
+
+Como deberiamos de escoger a y b
+- Define an error function for any given line
+- O escoger la linea que minimiza el error in the function
+
+Error function = Loss function = Cost function
+
+Residual - La distancia vertical | entre la linea / (de la función) and every plot
+Cada residuo positivo cancels out each negative residual
+
+RSS = La simatoria de los residuos al cuadrado
+The OLS: minimize the RSS
+ 
+
 #### Calcular el error
 
 ```python
 from sklearn.metrics import root_mean_squared_error
 
-r_squared = reg.score(X_test, y_test)  # R² — qué tan bien el modelo explica la varianza
-rmse = root_mean_squared_error(y_test, y_pred)  # error promedio en las mismas unidades que y
+''' # R² — qué tan bien el modelo explica la varianza 
+    (Values goes from 0 to 1).
+'''
+r_squared = reg.score(X_test, y_test) 
+
+'''
+    RMSE (Root Mean Squared Error) es una métrica de precisión que mide la diferencia promedio entre los valores predichos por un modelo y los valores reales.
+'''
+rmse = root_mean_squared_error(y_test, y_pred) 
 
 print("R^2: {}".format(r_squared))
 print("RMSE: {}".format(rmse))
 ```
 
-> **R²** cercano a 1 = el modelo explica bien los datos.
+> **R²** cercano a 1 = el modelo explica bien los datos. The plots are closer to the line.
 > **RMSE** más bajo = las predicciones están más cerca de los valores reales.
 > Son complementarios — úsalos juntos para evaluar el modelo.
 
@@ -258,3 +298,50 @@ rango = [0.025, 0.975]
 
 > Más folds = estimación más estable pero más lenta de computar.
 > 5 o 10 folds es el estándar de la industria.
+
+## Regularized regression
+
+Regularization penalize large coefficients (large coeficients can lead to overfitting)
+
+### Types of regularization
+#### Ridge regression
+
+Loss = Σ(y - ŷ)²  +  λ · Σβ²
+       └─ errors ─┘   └─ penalty ─┘
+
+β are your coefficients (the weights)
+λ (lambda) is the knob you set
+That ² on the betas is why it's called L2 regularization
+
+
+```python
+from sklearn.linear_model import Ridge
+scores = []
+
+for alpha in [0.1, 1.0, 10.0, 100.0, 1000.0]:
+    ridge = Ridge(alpha=alpha)
+    ridge.fit(X_train, y_train)
+    y_pred = ridge.predict(X_test)
+    scores.append(ridge.score(X_test, y_test))
+print(scores)
+```
+
+Lasso for feature selection
+
+```python
+from sklearn.linear_model import Lasso
+X = diabetes_df.drop("glucose", axis=1).values
+y = diabetes_df["glucose"].values
+names = diabetes_df.drop("glucose", axis=1).columns
+lasso = Lasso(alpha=0.1)
+lasso_coef = lasso.fit(X,y).coef_
+
+# Plot the coefficients for each feature
+plt.bar(names, lasso_coef)
+plt.xticks(rotation=45)
+plt.show()
+```
+
+<p align="center">
+  <img src="images/lasso_coef.png" alt="Lasso coefficients" width="500">
+</p>
