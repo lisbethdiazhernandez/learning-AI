@@ -343,5 +343,5 @@ plt.show()
 ```
 
 <p align="center">
-  <img src="images/lasso_coef.png" alt="Lasso coefficients" width="500">
+  <img src="images/lasso_coef_magnitude_caveat.png" alt="Lasso coefficients" width="500">
 </p>
