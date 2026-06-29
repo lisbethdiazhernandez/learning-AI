@@ -345,3 +345,108 @@ plt.show()
 <p align="center">
   <img src="images/lasso_coef_magnitude_caveat.png" alt="Lasso coefficients" width="500">
 </p>
+
+### Class imbalance
+Por ejemplo con tratar de predecir fraude, donde solo un pequeño porcentaje de los correos son fraudulentos.
+Accurracy is not the best, por que el modelo puede ser 99% accurate con los que no son fraude, pero con los que si
+podría ser terrible.
+
+#### Confusion matrix
+
+
+<p align="center">
+  <img src="confusion_matrix_2x2_layout.png" alt="Confusion Matrix" width="500">
+</p>
+Precision = de todo lo que dije "positivo", ¿cuánto era realmente positivo?
+```
+Precision = TP / (TP + FP)
+```
+
+Recall (sensibilidad) = de todos los positivos reales, ¿cuántos atrapé?
+```
+Recall = TP / (TP + FN)
+```
+
+F1 Score:
+```
+ 2 * ( (precision * recall) / (precision + recall) )
+```
+
+```python
+    from sklearn.metrics import classification_report, confusion_matrix
+    knn = KNeighborsClassifier(n_neighbors=7)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+    knn.fit(X_train, y_train)
+    y_pred = knn.predict(X_test)
+    print(confusion_matrix(y_test, y_pred))
+```
+
+
+## Logistic regression for binary classification
+si una probabilidad p > 0.5
+the data is set as 1 
+
+si una probabilidad p < 0.5
+the data is set as 0
+
+```python
+    from sklearn.linear_model import LogisticRegression
+    logreg = LogisticRegression()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state=42)
+    logreg.fit(X_train, y_train)
+    y_pred = logreg.predict(X_test)
+     
+```
+
+#### ROC curve
+```python
+    from sklearn.metrics import roc_curve
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_probs)
+    plt.plot([0,1], [0,1], 'k--')
+    plt.plot(fpr, tpr)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Logistic Regression ROC Curve")
+    plt.show()
+```
+
+#### ROC AUC
+The area under the curve 
+```python
+    from sklearn.metrics import roc_auc_score
+    print(roc_auc_score(y_test, y_pred_probs))
+```
+
+
+## Fine Tuning 
+
+#### Hyperparameter tuning
+Ya que sabemos como evaluarlo ahora como podemos optimizarlo?
+Se usan distintos hiperparametros, we fit all of them separately, vemos how they perform y se 
+escogen los mejores.
+
+Se usa cross-validation to avoid overfitting.
+
+
+
+ #### Grid search cross-validation
+ ```python
+    from sklearn.model_selection import GridSearchCV
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    param_grid = {"alpha": np.arange(0.0001,1,10),
+                    "solver": ["sag","lsqr"]}
+    ridge = Ridge()
+    ridge_cv = GridSearchCV(ridge, param_grid, cv=kf)
+    ridge_cv.fit(X_train, y_train)
+    print(ridge_cv.best_params_, ridge_cv.best_score_)
+```
+ ```python
+    from sklearn.model_selection import RandomizedSearchCV
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    param_grid = {"alpha": np.arange(0.0001,1,10),
+                    "solver": ["sag","lsqr"]}
+    ridge = Ridge()
+    ridge_cv = RandomizedSearchCV(ridge, param_grid, cv=kf)
+    ridge_cv.fit(X_train, y_train)
+    print(ridge_cv.best_params_, ridge_cv.best_score_)
+```
